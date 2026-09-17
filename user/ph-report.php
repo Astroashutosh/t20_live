@@ -1,0 +1,114 @@
+<?php include('header.php')  ?>
+
+<div class="dash-main">
+
+    <div class="dash-topbar">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <button
+                class="sidebar-toggle-btn"
+                data-action="toggle-sidebar">
+
+                <i class="bi bi-list fs-5"></i>
+
+            </button>
+
+            <h6 class="mb-0 d-none d-md-block">
+                PH Report
+            </h6>
+
+        </div>
+
+    </div>
+
+
+    <div class="dash-content">
+
+        <div class="glass-card table-responsive-veri">
+
+            <div class="table-responsive">
+
+                <table class="table table-veri mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>PH ID</th>
+
+                            <th>Wallet Address</th>
+
+                            <th>Amount</th>
+
+                            <th>Cycle</th>
+
+                            <th>Type</th>
+
+                            <th>Date</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="phTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <nav class="mt-3">
+
+            <ul
+                class="pagination justify-content-center"
+                id="phPagination">
+            </ul>
+
+        </nav>
+
+    </div>
+
+</div>
+
+</div>
+
+<?php include('footer.php') ?>
+
+
+<style>
+
+.pagination .page-link {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #06110A;
+}
+
+.pagination .page-item.disabled .page-link {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+}
+
+</style>
+
+
+<script>
+
+$(document).ready(function () {
+
+    loadPHReport();
+
+});
+
+
+</script>

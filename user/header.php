@@ -127,6 +127,19 @@ $reportsOpen = in_array($page, $reportPages);
                 Level Binary Report
             </a>
 
+
+                 <a href="ph-report"
+               class="dash-submenu-link <?= $page=='ph-report'?'active':'' ?>">
+                <i class="bi bi-dot"></i>
+               PH Report
+            </a>
+
+                 <a href="gh-report"
+               class="dash-submenu-link <?= $page=='gh-report'?'active':'' ?>">
+                <i class="bi bi-dot"></i>
+                GH Report
+            </a>
+
             <!-- <a href="laps-report"
                class="dash-submenu-link <?= $page=='laps-report'?'active':'' ?>">
                 <i class="bi bi-dot"></i>

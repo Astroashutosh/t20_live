@@ -1,4 +1,4 @@
-const main_contract = "0xa2bd5D5fb4FF2eD69E40F63D7c817e22b44332D5";
+const main_contract = "0xe8fa5f4a23ee00D41480c94432928D26f4DA3d24";
 // const staking_contract = "0x2e943d2Eb028C5c613b741902906071C597dE41b";
 const staking_contract = "0x01734DC7F66c82280e82b8f63234b44A54EcfE5B";
 
@@ -17,22 +17,22 @@ const routerContract = new p.eth.Contract(routerABI, router);
 
 
 // OLD TOKEN CONTRACT
-let oldToken = null;
+// let oldToken = null;
 
-async function initOldTokenContract() {
-    try {
-        const oldTokenAddress = await mainContract.methods.oldToken().call();
+// async function initOldTokenContract() {
+//     try {
+//         const oldTokenAddress = await mainContract.methods.oldToken().call();
 
-        oldToken = new p.eth.Contract(token, oldTokenAddress);
+//         oldToken = new p.eth.Contract(token, oldTokenAddress);
 
-        console.log("Old Token Address:", oldTokenAddress);
+//         console.log("Old Token Address:", oldTokenAddress);
 
-        return oldToken;
-    } catch (error) {
-        console.error("Old token contract initialization error:", error);
-        throw error;
-    }
-}
+//         return oldToken;
+//     } catch (error) {
+//         console.error("Old token contract initialization error:", error);
+//         throw error;
+//     }
+// }
 
 
 
@@ -100,13 +100,15 @@ async function getAccount() {
               // const user_cycle = await mainContract.methods.userCycle(account).call();
 
 
-          await initOldTokenContract();
+        //   await initOldTokenContract();
 
           const user_details = await mainContract.methods.userBase(account).call();
           const binary_details = await mainContract.methods.binary(account).call();
           const binary_income = await mainContract.methods.getBinaryIncome(account).call();
           const direct_referral_count = await mainContract.methods.getDirectReferralCount(account).call();
           const user_cycle = await mainContract.methods.userCycle(account).call();
+          const max_cycle = await mainContract.methods.MAX_CYCLES().call();
+
 
             if (user_details['referrer'] != '0x0000000000000000000000000000000000000000') {
                 const reff_details = await mainContract.methods.userBase(user_details['referrer']).call();
@@ -137,7 +139,7 @@ async function getAccount() {
             $('.currentCycle').text(user_cycle['currentCycle']);
 
 
-            if (user_cycle['currentCycle'] == 30) {
+            if (user_cycle['currentCycle'] == max_cycle) {
                 $('#provideHelp').hide();
                 $('#claimBinaryBtn').hide();
                 $('#topUP').show();
@@ -1333,9 +1335,7 @@ async function getTotalLevelBusiness() {
             return;
         }
 
-        const user = await mainContract.methods
-            .userBase(account)
-            .call();
+        const user = await mainContract.method.userBase(account).call();
 
         if (!user.registered) {
             return;
@@ -1368,17 +1368,13 @@ async function getTotalLevelBusiness() {
                 Number(data.rightBusiness || data[1] || 0);
         }
 
-        $(".totalLeftBusinessAll")
-            .text(`$ ${(totalLeftBusiness / 1e18).toFixed(4)}`);
+        $(".totalLeftBusinessAll").text(`$ ${(totalLeftBusiness / 1e18).toFixed(4)}`);
 
-        $(".totalRightBusinessAll")
-            .text(`$ ${(totalRightBusiness / 1e18).toFixed(4)}`);
+        $(".totalRightBusinessAll").text(`$ ${(totalRightBusiness / 1e18).toFixed(4)}`);
 
-        $(".totalLeftBusinessCurrent")
-            .text(`$ ${(currentLeftBusiness / 1e18).toFixed(4)}`);
+        $(".totalLeftBusinessCurrent").text(`$ ${(currentLeftBusiness / 1e18).toFixed(4)}`);
 
-        $(".totalRightBusinessCurrent")
-            .text(`$ ${(currentRightBusiness / 1e18).toFixed(4)}`);
+        $(".totalRightBusinessCurrent").text(`$ ${(currentRightBusiness / 1e18).toFixed(4)}`);
 
     } catch (error) {
         console.error("Total Level Business Error:", error);
@@ -1399,172 +1395,592 @@ async function getTotalLevelBusiness() {
 
 
 
+    function escapeHtml(value) {
 
-async function loadGHHistory() {
-    const tbody = $("#ghTableBody");
+        return String(value ?? "")
+            .replace(/[&<>"']/g, function (c) {
 
-    tbody.html(`
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[c];
+
+            });
+
+    }
+
+// =====================================================
+// GH REPORT
+// =====================================================
+
+async function loadGHReport() {
+
+    const tbody = document.getElementById("ghTableBody");
+
+    tbody.innerHTML = `
         <tr>
-            <td colspan="7" class="text-center py-4">
+            <td colspan="6" class="text-center py-4">
                 <span class="spinner-border spinner-border-sm me-2"></span>
                 Loading GH history...
             </td>
         </tr>
-    `);
+    `;
 
     try {
-        account = await getCurrentAccount();
+
+        const account = await getCurrentAccount();
 
         if (!account) {
-            tbody.html(`
+
+            tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="text-center text-warning py-4">
-                        Wallet not connected.
+                    <td colspan="6"
+                        class="text-center text-warning py-4">
+                        Please connect your wallet.
                     </td>
                 </tr>
-            `);
+            `;
+
             return;
         }
 
-        const user = await mainContract.methods
-            .userBase(account)
+
+        // =================================================
+        // GET USER GH RECORD IDS
+        // =================================================
+
+        const ids = await mainContract.methods
+            .getUserGHRecords(account)
             .call();
 
-        if (!user.registered) {
-            tbody.html(`
+        console.log("User GH Record IDs:", ids);
+
+
+        if (!ids || ids.length === 0) {
+
+            tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="text-center text-warning py-4">
-                        User not registered.
-                    </td>
-                </tr>
-            `);
-            return;
-        }
-
-        // Latest GH slots
-        const slots = await mainContract.methods
-            .getLatestGHSlots(account, 50)
-            .call();
-
-        tbody.empty();
-
-        if (!slots || slots.length === 0) {
-            tbody.html(`
-                <tr>
-                    <td colspan="7" class="text-center text-secondary py-4">
+                    <td colspan="6"
+                        class="text-center text-secondary py-4">
                         No GH history found.
                     </td>
                 </tr>
-            `);
+            `;
+
             return;
         }
 
-        // Latest first
-        slots.reverse();
 
-        slots.forEach((slot) => {
-            addGHHistoryRow(slot);
+        // =================================================
+        // GET GH REQUEST DATA
+        // =================================================
+
+        const records = [];
+
+        for (const id of ids) {
+
+            try {
+
+                const request = await mainContract.methods
+                    .ghRequests(id)
+                    .call();
+
+                console.log(
+                    "GH Request",
+                    id,
+                    request
+                );
+
+                if (
+                    request &&
+                    request.id &&
+                    Number(request.id) > 0
+                ) {
+
+                    records.push(request);
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "GH Request Error:",
+                    id,
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (records.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6"
+                        class="text-center text-secondary py-4">
+                        No GH history found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        // =================================================
+        // LATEST FIRST
+        // =================================================
+
+        records.reverse();
+
+        tbody.innerHTML = "";
+
+
+        // =================================================
+        // SHOW DATA
+        // =================================================
+
+        records.forEach(function (request) {
+
+            const id = request.id;
+
+            const wallet = request.user;
+
+            const requestIndex =
+                request.requestIndex;
+
+            const amount =
+                Number(
+                    Web3.utils.fromWei(
+                        String(request.amount),
+                        "ether"
+                    )
+                );
+
+            const createTime =
+                Number(request.createTime);
+
+
+            const status =
+                request.completed
+                    ? `
+                        <span class="badge bg-success">
+                            Completed
+                        </span>
+                      `
+                    : request.active
+                        ? `
+                            <span class="badge bg-warning text-dark">
+                                Active
+                            </span>
+                          `
+                        : `
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+                          `;
+
+
+            const row = document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    <span class="badge bg-secondary">
+                        #${escapeHtml(id)}
+                    </span>
+                </td>
+
+                <td class="font-monospace text-white">
+                    ${escapeHtml(
+                        shortAddress(wallet)
+                    )}
+                </td>
+
+                <td class="fw-bold text-success">
+                    $${amount.toFixed(2)} USDT
+                </td>
+
+                <td class="text-white">
+                    #${escapeHtml(requestIndex)}
+                </td>
+
+                <td class="text-white">
+                    ${convertTimestamp(createTime)}
+                </td>
+
+                <td>
+                    ${status}
+                </td>
+
+            `;
+
+            tbody.appendChild(row);
+
         });
 
-    } catch (error) {
-        console.error("GH history error:", error);
 
-        tbody.html(`
+    } catch (error) {
+
+        console.error(
+            "GH Report Error:",
+            error
+        );
+
+        tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="text-center text-danger py-4">
+                <td colspan="6"
+                    class="text-center text-danger py-4">
                     Unable to load GH history.
                 </td>
             </tr>
-        `);
+        `;
+
     }
+
 }
 
 
-function addGHHistoryRow(slot) {
 
-    const id = slot.id;
-    const requestIndex = slot.requestIndex;
 
-    const amount = Number(slot.amount) / 1e18;
 
-    const createTime = Number(slot.createTime);
 
-    const dateString = createTime > 0
-        ? new Date(createTime * 1000).toLocaleString()
-        : "--";
 
-    let status = "";
+// =====================================================
+// PH REPORT
+// =====================================================
 
-    if (slot.completed) {
-        status = `
-            <span class="badge bg-success">
-                Completed
-            </span>
-        `;
-    } else if (slot.active) {
-        status = `
-            <span class="badge bg-primary">
-                Active
-            </span>
-        `;
-    } else {
-        status = `
-            <span class="badge bg-secondary">
-                Inactive
-            </span>
-        `;
-    }
+async function loadPHReport() {
 
-    const tr = $("<tr>");
+    const tbody =
+        document.getElementById("phTableBody");
 
-    tr.append(`
-        <td class="mono text-secondary">
-            #${id}
-        </td>
-    `);
 
-    tr.append(`
-        <td class="mono text-secondary">
-            ${requestIndex}
-        </td>
-    `);
+    tbody.innerHTML = `
+        <tr>
 
-    tr.append(`
-        <td class="mono">
-            $${amount.toFixed(2)}
-        </td>
-    `);
+            <td colspan="7"
+                class="text-center py-4">
 
-    tr.append(`
-        <td class="mono text-secondary">
-            ${dateString}
-        </td>
-    `);
+                <span
+                    class="spinner-border spinner-border-sm me-2">
+                </span>
 
-    tr.append(`
-        <td class="mono text-secondary">
-            Cycle ${slot.cycle}
-        </td>
-    `);
+                Loading PH history...
 
-    tr.append(`
-        <td>
-            ${status}
-        </td>
-    `);
+            </td>
 
-    tr.append(`
-        <td>
-            ${
-                slot.active && !slot.completed
-                    ? `<span class="text-success">Running</span>`
-                    : `<span class="text-secondary">--</span>`
+        </tr>
+    `;
+
+
+    try {
+
+        const account =
+            await getCurrentAccount();
+
+
+        if (!account) {
+
+            tbody.innerHTML = `
+                <tr>
+
+                    <td colspan="7"
+                        class="text-center text-warning py-4">
+
+                        Please connect your wallet.
+
+                    </td>
+
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        // =================================================
+        // GET USER PH ORDER IDS
+        // =================================================
+
+        const ids =
+            await mainContract.methods
+                .getUserPHOrders(account)
+                .call();
+
+
+        console.log(
+            "User PH Order IDs:",
+            ids
+        );
+
+
+        if (!ids || ids.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+
+                    <td colspan="7"
+                        class="text-center text-secondary py-4">
+
+                        No PH history found.
+
+                    </td>
+
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        // =================================================
+        // GET PH ORDER DATA
+        // =================================================
+
+        const orders = [];
+
+
+        for (const id of ids) {
+
+            try {
+
+                const order =
+                    await mainContract.methods
+                        .phOrders(id)
+                        .call();
+
+
+                console.log(
+                    "PH Order",
+                    id,
+                    order
+                );
+
+
+                if (
+                    order &&
+                    order.id &&
+                    Number(order.id) > 0
+                ) {
+
+                    orders.push(order);
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "PH Order Error:",
+                    id,
+                    error
+                );
+
             }
-        </td>
-    `);
 
-    $("#ghTableBody").append(tr);
+        }
+
+
+        if (orders.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+
+                    <td colspan="7"
+                        class="text-center text-secondary py-4">
+
+                        No PH history found.
+
+                    </td>
+
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        // =================================================
+        // LATEST FIRST
+        // =================================================
+
+        orders.reverse();
+
+
+        tbody.innerHTML = "";
+
+
+        // =================================================
+        // SHOW PH DATA
+        // =================================================
+
+        orders.forEach(function (order) {
+
+            const id =
+                order.id;
+
+
+            const wallet =
+                order.user;
+
+
+            const amount =
+                Number(
+                    Web3.utils.fromWei(
+                        String(order.amount),
+                        "ether"
+                    )
+                );
+
+
+            const cycle =
+                order.cycle;
+
+
+            const typeIndex =
+                Number(order.phType);
+
+
+            const typeNames = [
+                "Initial PH 1",
+                "Initial PH 2",
+                "Regular Cycle",
+                "Admin PH",
+                "Top Up"
+            ];
+
+
+            const type =
+                typeNames[typeIndex] ||
+                "Unknown";
+
+
+            const createTime =
+                Number(order.createTime);
+
+
+            const status =
+                order.completed
+                    ? `
+                        <span class="badge bg-success">
+                            Completed
+                        </span>
+                      `
+                    : order.active
+                        ? `
+                            <span class="badge bg-warning text-dark">
+                                Active
+                            </span>
+                          `
+                        : `
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+                          `;
+
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <span class="badge bg-secondary">
+
+                        #${escapeHtml(id)}
+
+                    </span>
+
+                </td>
+
+
+                <td class="font-monospace text-white">
+
+                    ${escapeHtml(
+                        shortAddress(wallet)
+                    )}
+
+                </td>
+
+
+                <td class="fw-bold text-success">
+
+                    $${amount.toFixed(2)} USDT
+
+                </td>
+
+
+                <td class="text-white">
+
+                    #${escapeHtml(cycle)}
+
+                </td>
+
+
+                <td class="text-white">
+
+                    ${escapeHtml(type)}
+
+                </td>
+
+
+                <td class="text-white">
+
+                    ${convertTimestamp(createTime)}
+
+                </td>
+
+
+                <td>
+
+                    ${status}
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "PH Report Error:",
+            error
+        );
+
+
+        tbody.innerHTML = `
+            <tr>
+
+                <td colspan="7"
+                    class="text-center text-danger py-4">
+
+                    Unable to load PH history.
+
+                </td>
+
+            </tr>
+        `;
+
+    }
+
 }
+
 
 
 

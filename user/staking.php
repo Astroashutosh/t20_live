@@ -1110,48 +1110,10 @@
 <script>
 (function () {
 
-    /*
-    ============================================================
-    REAL T20 STAKING CONTRACT
-
-    stakingContract
-        -> T20Staking contract
-
-    oldToken
-        -> OLD T20 ERC20 token
-
-    staking_contract
-        -> staking contract address
-
-    Contract functions used:
-
-        oldT20Token()
-        newT20Token()
-
-        stake(amount)
-
-        claimReward()
-
-        getUserInfo(address)
-
-        canClaim(address)
-
-        nextClaimTime(address)
-
-        pendingReward(address)
-
-        timeUntilClaim(address)
-
-        getUserStakeLogIds(address)
-
-        getStakeLog(id)
-
-    ============================================================
-    */
-
     const DECIMALS = 18;
     const CLAIM_PERIOD = 15 * 24 * 60 * 60;
     const REWARD_PERCENT = 10;
+
 
 
     function toast(message, error = false) {
@@ -1203,22 +1165,6 @@
     }
 
 
-    function escapeHtml(value) {
-
-        return String(value ?? "")
-            .replace(/[&<>"']/g, function (c) {
-
-                return {
-                    "&": "&amp;",
-                    "<": "&lt;",
-                    ">": "&gt;",
-                    '"': "&quot;",
-                    "'": "&#039;"
-                }[c];
-
-            });
-
-    }
 
 
     function money(value) {
@@ -1391,10 +1337,10 @@
             if (!account) {
 
                 $("#stakeWalletBalance")
-                    .text("0 OLD");
+                    .text("0 ");
 
                 $("#stakeAvailable")
-                    .text("0 OLD");
+                    .text("0 ");
 
                 return 0;
 
@@ -1402,7 +1348,7 @@
 
 
             const raw =
-                await oldToken.methods
+                await usdtContract.methods
                     .balanceOf(account)
                     .call();
 
@@ -1411,10 +1357,10 @@
 
 
             $("#stakeWalletBalance")
-                .text(money(balance) + " OLD");
+                .text(money(balance) );
 
             $("#stakeAvailable")
-                .text(money(balance) + " OLD");
+                .text(money(balance) );
 
 
             return balance;
@@ -1537,10 +1483,10 @@
     function resetMetrics() {
 
         $("#stakeTotal")
-            .text("0 OLD");
+            .text("0 ");
 
         $("#stakeCapital")
-            .text("0 OLD");
+            .text("0 ");
 
         $("#stakeNextClaim")
             .text("--");
@@ -2149,11 +2095,8 @@ async function loadClaimStatus() {
                 );
 
 
-            /*
-             * Check OLD TOKEN balance
-             */
             const rawBalance =
-                await oldToken.methods
+                await usdtContract.methods
                     .balanceOf(account)
                     .call();
 
@@ -2198,11 +2141,8 @@ async function loadClaimStatus() {
             }
 
 
-            /*
-             * Read current allowance
-             */
             const allowance =
-                await oldToken.methods
+                await usdtContract.methods
                     .allowance(
                         account,
                         staking_contract
@@ -2214,9 +2154,6 @@ async function loadClaimStatus() {
                 await getGasPriceSafe();
 
 
-            /*
-             * APPROVAL
-             */
             if (
                 window.BigNumber
                     ? new BigNumber(
@@ -2237,7 +2174,7 @@ async function loadClaimStatus() {
 
 
                 const approveTx =
-                    oldToken.methods
+                    usdtContract.methods
                         .approve(
                             staking_contract,
                             amount

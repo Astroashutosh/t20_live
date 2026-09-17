@@ -21,11 +21,6 @@ const e = [
 			},
 			{
 				"internalType": "address",
-				"name": "_oldToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
 				"name": "_router",
 				"type": "address"
 			},
@@ -37,19 +32,6 @@ const e = [
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "ADMIN_PH_AMOUNT",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -169,45 +151,6 @@ const e = [
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "OLD_TOKEN_MAX_CLAIMS",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "OLD_TOKEN_MONTH",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "OLD_TOKEN_MONTHLY_BPS",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -233,6 +176,19 @@ const e = [
 	{
 		"inputs": [],
 		"name": "PH_AMOUNT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "PH_BINARY_CAP_PER_LEVEL",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -271,20 +227,7 @@ const e = [
 	},
 	{
 		"inputs": [],
-		"name": "REG_BOOSTER_BINARY",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "REG_LEVEL_BINARY",
+		"name": "REGULAR_BINARY_CAP_PER_LEVEL",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -311,45 +254,6 @@ const e = [
 	{
 		"inputs": [],
 		"name": "TOPUP_AMOUNT",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "TOPUP_BOOSTER_PAYOUT",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "adminGHCreated",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "adminGHRequestId",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -453,19 +357,6 @@ const e = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_stakeId",
-				"type": "uint256"
-			}
-		],
-		"name": "claimOldTokenReward",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "creator",
 		"outputs": [
@@ -516,53 +407,6 @@ const e = [
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "getAdminGHRequest",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "active",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "completed",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "getBinaryBusiness",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "leftBusiness",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "rightBusiness",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -581,40 +425,6 @@ const e = [
 				"internalType": "uint256",
 				"name": "totalBoosterIncome",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "getBinaryTree",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "parent",
-				"type": "address"
-			},
-			{
-				"internalType": "uint8",
-				"name": "parentSide",
-				"type": "uint8"
-			},
-			{
-				"internalType": "address",
-				"name": "leftChild",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "rightChild",
-				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -673,185 +483,6 @@ const e = [
 	},
 	{
 		"inputs": [],
-		"name": "getGHQueueState",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "head",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tail",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_count",
-				"type": "uint256"
-			}
-		],
-		"name": "getLatestGHSlots",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "id",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "requestIndex",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "createTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "cycle",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "active",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "completed",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct T20PHelpingPlan.GHSlotView[]",
-				"name": "slots",
-				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			},
-			{
-				"internalType": "uint8",
-				"name": "_level",
-				"type": "uint8"
-			}
-		],
-		"name": "getLevelBusiness",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "leftBusiness",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rightBusiness",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalLeftBusiness",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalRightBusiness",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "leftBusinessPH",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rightBusinessPH",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalLeftBusinessPH",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "totalRightBusinessPH",
-						"type": "uint256"
-					}
-				],
-				"internalType": "struct T20PHelpingPlan.BinaryLevelBusiness",
-				"name": "",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_helper",
-				"type": "address"
-			}
-		],
-		"name": "getNextEligibleGHRequest",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "requestIndex",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getNextGHRequest",
 		"outputs": [
 			{
@@ -882,106 +513,6 @@ const e = [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_stakeId",
-				"type": "uint256"
-			}
-		],
-		"name": "getOldTokenStake",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "id",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "user",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "originalCapital",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "remainingCapital",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "claimedCapital",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "claimCount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "lastClaimTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "createTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "active",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct T20PHelpingPlan.OldTokenStake",
-				"name": "",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "getOldTokenStakingState",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "totalStakes",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalOriginalCapital",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalRemainingCapital",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalClaimedCapital",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
 				"name": "_tokenAmount",
 				"type": "uint256"
 			}
@@ -992,6 +523,57 @@ const e = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "txType",
+				"type": "string"
+			}
+		],
+		"name": "getTransactionLogByType",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "sumEarning",
+				"type": "uint256"
+			},
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "txType",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "addon",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct T20PHelpingPlan.Transaction[]",
+				"name": "",
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -1121,18 +703,8 @@ const e = [
 					},
 					{
 						"internalType": "bool",
-						"name": "needsAdminPH",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
 						"name": "needsTopUp",
 						"type": "bool"
-					},
-					{
-						"internalType": "uint256",
-						"name": "adminPHCount",
-						"type": "uint256"
 					},
 					{
 						"internalType": "uint256",
@@ -1194,62 +766,6 @@ const e = [
 				"type": "address"
 			}
 		],
-		"name": "getUserGHSlots",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "id",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "requestIndex",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "createTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "cycle",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "active",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "completed",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct T20PHelpingPlan.GHSlotView[]",
-				"name": "slots",
-				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
 		"name": "getUserGHState",
 		"outputs": [
 			{
@@ -1286,44 +802,12 @@ const e = [
 				"type": "address"
 			}
 		],
-		"name": "getUserOldTokenStakes",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
 		"name": "getUserPHOrders",
 		"outputs": [
 			{
 				"internalType": "uint256[]",
 				"name": "",
 				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "ghEnabled",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1586,91 +1070,16 @@ const e = [
 				"internalType": "uint256",
 				"name": "totalRightBusinessPH",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "oldToken",
-		"outputs": [
-			{
-				"internalType": "contract IERC20",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "oldTokenStakeCounter",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "oldTokenStakes",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
 			},
 			{
 				"internalType": "uint256",
-				"name": "originalCapital",
+				"name": "regularBinaryPaid",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "remainingCapital",
+				"name": "phBinaryPaid",
 				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "claimedCapital",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "claimCount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "lastClaimTime",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "createTime",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "active",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1697,19 +1106,6 @@ const e = [
 				"internalType": "contract IPancakeRouter",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "phEnabled",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1807,13 +1203,6 @@ const e = [
 	},
 	{
 		"inputs": [],
-		"name": "provideAdminPH",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "provideHelp",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -1858,25 +1247,6 @@ const e = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			}
-		],
-		"name": "stakeOldToken",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "stakeId",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "topUp",
 		"outputs": [],
@@ -1890,6 +1260,45 @@ const e = [
 			{
 				"internalType": "uint256",
 				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "transactionLogs",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "txType",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "addon",
 				"type": "uint256"
 			}
 		],
@@ -2005,18 +1414,8 @@ const e = [
 			},
 			{
 				"internalType": "bool",
-				"name": "needsAdminPH",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
 				"name": "needsTopUp",
 				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "adminPHCount",
-				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -2089,7 +1488,7 @@ const e = [
 		"stateMutability": "payable",
 		"type": "receive"
 	}
-];
+]; 
 
 const routerABI = [
     

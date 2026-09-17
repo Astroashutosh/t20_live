@@ -101,8 +101,8 @@
                             <div class="phgh-stat__label">Handled by You</div>
                             <div class="phgh-stat__icon"><i class="bi bi-check2-circle"></i></div>
                         </div>
-                        <div class="phgh-stat__value" id="phStatHandled">0</div>
-                        <div class="phgh-stat__hint">Demo completed requests</div>
+                        <div class="phgh-stat__value totalPHCommitted" >0</div>
+                       
                     </div>
                 </div>
             </div>
@@ -197,9 +197,6 @@
 <?php include('footer.php'); ?>
 
 <script>
-/* =========================================================
-   PH LIVE CONTRACT ENGINE
-   ========================================================= */
 
 (function(){
 
@@ -255,155 +252,95 @@
         },2800);
     }
 
-    /*
-     * Live PH request from smart contract.
-     * getNextGHRequest() returns:
-     * id, user, requestIndex, amount
-     */
-    async function renderPH(){
 
-        const list = document.getElementById("phList");
+async function renderPH(){
 
-        list.innerHTML = `
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Wallet Address</th>
-                            <th>Amount</th>
-                            <th>Request</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+    const list = document.getElementById("phList");
 
-                    <tbody id="phTableBody">
-                        <tr>
-                            <td colspan="5" class="text-center py-4">
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                                Loading PH request...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        `;
-
-        const tbody = document.getElementById("phTableBody");
-
-        try{
-
-            const request = await mainContract.methods
-                .getNextGHRequest()
-                .call();
-
-            const id = request.id !== undefined ? request.id : request[0];
-            const wallet = request.user !== undefined ? request.user : request[1];
-            const requestIndex =
-                request.requestIndex !== undefined
-                    ? request.requestIndex
-                    : request[2];
-
-            const rawAmount =
-                request.amount !== undefined
-                    ? request.amount
-                    : request[3];
-
-            if(!id || String(id) === "0"){
-
-                tbody.innerHTML = `
+    list.innerHTML = `
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
                     <tr>
-                        <td colspan="5" class="text-center py-5">
-                            <div class="d-flex flex-column align-items-center justify-content-center">
-                                <div class="mb-3" style="width:52px;height:52px;border-radius:14px;
-                                    display:flex;align-items:center;justify-content:center;
-                                    background:rgba(0,255,170,.08);border:1px solid rgba(0,255,170,.18);">
-                                    <i class="bi bi-hand-thumbs-up-fill fs-4" style="color:var(--neon);"></i>
-                                </div>
+                        <th>ID</th>
+                        <th>Wallet Address</th>
+                        <th>Amount</th>
+                        <th>Request</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                                <div class="fw-semibold text-light mb-1">
-                                    Ready to Provide Help
-                                </div>
-
-                                <div class="text-secondary small mb-3">
-                                    No PH request is currently displayed. You can continue with Provide Help.
-                                </div>
-
-                                <button
-                                    type="button"
-                                    class="btn btn-success btn-sm px-4"
-                                    onclick="PHGH.openDirectPhConfirm()">
-                                    <i class="bi bi-hand-thumbs-up me-1"></i>
-                                    Provide Help
-                                </button>
-                            </div>
+                <tbody id="phTableBody">
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Loading PH requests...
                         </td>
                     </tr>
-                `;
+                </tbody>
+            </table>
+        </div>
+    `;
 
-                document.getElementById("phStatActive").innerText = "0";
-                document.getElementById("phStatVolume").innerText = "0.00";
-                document.getElementById("phCounter").innerText = "0 / 0";
-                // document.getElementById("tabPhCount").innerText = "0";
+    const tbody = document.getElementById("phTableBody");
 
-                return;
-            }
+    try {
 
-            const amount = Number(
-                Web3.utils.fromWei(String(rawAmount), "ether")
-            );
+        // ============================================
+        // GET STARTING ID FROM ghQueueHead
+        // ============================================
 
-            tbody.innerHTML = `
-                <tr>
-                    <td>
-                        <span class="badge bg-secondary">
-                            #${escapeHtml(id)}
-                        </span>
-                    </td>
+        let currentId = Number(
+            await mainContract.methods
+                .ghQueueHead()
+                .call()
+        );
 
-                    <td class="font-monospace">
-                        ${escapeHtml(shortAddress(wallet))}
-                    </td>
+        console.log("GH Queue Head:", currentId);
 
-                    <td class="fw-bold text-success">
-                        $${amount.toFixed(2)} USDT
-                    </td>
+        // ============================================
+        // NO REQUEST
+        // ============================================
 
-                    <td>
-                        #${escapeHtml(requestIndex)}
-                    </td>
-
-                    <td>
-                        <button
-                            type="button"
-                            class="btn btn-success btn-sm"
-                            onclick="PHGH.openPhConfirm({
-                                id:'${escapeHtml(id)}',
-                                amount:'${amount}',
-                                wallet:'${escapeHtml(wallet)}'
-                            })">
-                            <i class="bi bi-hand-thumbs-up me-1"></i>
-                            Provide Help
-                        </button>
-                    </td>
-                </tr>
-            `;
-
-            document.getElementById("phStatActive").innerText = "1";
-            document.getElementById("phStatVolume").innerText =
-                amount.toFixed(2);
-            document.getElementById("phCounter").innerText = "1 / 1";
-            // document.getElementById("tabPhCount").innerText = "1";
-
-        }catch(error){
-
-            console.error("PH Request Error:", error);
+        if (!currentId || currentId === 0) {
 
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-danger py-4">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-                        Unable to load PH request.
+                    <td colspan="5" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center">
+
+                            <div class="mb-3"
+                                style="
+                                    width:52px;
+                                    height:52px;
+                                    border-radius:14px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    background:rgba(0,255,170,.08);
+                                    border:1px solid rgba(0,255,170,.18);
+                                ">
+                                <i class="bi bi-hand-thumbs-up-fill fs-4"
+                                   style="color:var(--neon);"></i>
+                            </div>
+
+                            <div class="fw-semibold text-light mb-1">
+                                Ready to Provide Help
+                            </div>
+
+                            <div class="text-secondary small mb-3">
+                                No PH request is currently available.
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm px-4"
+                                onclick="PHGH.openDirectPhConfirm()">
+                                <i class="bi bi-hand-thumbs-up me-1"></i>
+                                Provide Help
+                            </button>
+
+                        </div>
                     </td>
                 </tr>
             `;
@@ -411,14 +348,420 @@
             document.getElementById("phStatActive").innerText = "0";
             document.getElementById("phStatVolume").innerText = "0.00";
             document.getElementById("phCounter").innerText = "0 / 0";
-            // document.getElementById("tabPhCount").innerText = "0";
+
+            return;
         }
+
+        // ============================================
+        // GET REQUESTS
+        //
+        // ghQueueHead = 10
+        //
+        // ghRequests(10)
+        // ghRequests(11)
+        // ghRequests(12)
+        // ghRequests(13)
+        // ...
+        //
+        // jab request nahi milegi -> STOP
+        // ============================================
+
+        const requests = [];
+
+        let safetyCounter = 0;
+
+        while (true) {
+
+            safetyCounter++;
+
+            // Safety protection
+            if (safetyCounter > 1000) {
+                console.warn(
+                    "PH loop stopped because safety limit reached."
+                );
+                break;
+            }
+
+            console.log(
+                "Checking GH Request ID:",
+                currentId
+            );
+
+            try {
+
+                const request = await mainContract.methods
+                    .ghRequests(currentId)
+                    .call();
+
+                console.log(
+                    "ghRequests(" + currentId + "):",
+                    request
+                );
+
+                // ========================================
+                // GET REQUEST ID
+                // ========================================
+
+                const id =
+                    request.id !== undefined
+                        ? request.id
+                        : request[0];
+
+                // ========================================
+                // NO VALUE -> STOP LOOP
+                // ========================================
+
+                if (
+                    id === undefined ||
+                    id === null ||
+                    String(id) === "0"
+                ) {
+
+                    console.log(
+                        "No more GH requests at ID:",
+                        currentId
+                    );
+
+                    break;
+                }
+
+                // ========================================
+                // VALID REQUEST
+                // ========================================
+
+                requests.push(request);
+
+                // ========================================
+                // IMPORTANT:
+                // NO ghQueueNext()
+                //
+                // Just increment ID
+                // ========================================
+
+                currentId++;
+
+            } catch (error) {
+
+                console.log(
+                    "Stopped at GH Request ID:",
+                    currentId,
+                    error
+                );
+
+                break;
+            }
+        }
+
+        console.log(
+            "Total GH Requests:",
+            requests.length
+        );
+
+        // ============================================
+        // NO HISTORY
+        // ============================================
+
+        if (requests.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <div class="text-secondary">
+                            No PH request is currently available.
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("phStatActive").innerText = "0";
+            document.getElementById("phStatVolume").innerText = "0.00";
+            document.getElementById("phCounter").innerText = "0 / 0";
+
+            return;
+        }
+
+        // ============================================
+        // CLEAR LOADING
+        // ============================================
+
+        tbody.innerHTML = "";
+
+        let totalVolume = 0;
+
+        // ============================================
+        // SHOW ALL REQUESTS
+        // ============================================
+
+        // requests.forEach((request) => {
+
+        //     const id =
+        //         request.id !== undefined
+        //             ? request.id
+        //             : request[0];
+
+        //     const wallet =
+        //         request.user !== undefined
+        //             ? request.user
+        //             : request[1];
+
+        //     const requestIndex =
+        //         request.requestIndex !== undefined
+        //             ? request.requestIndex
+        //             : request[2];
+
+        //     const rawAmount =
+        //         request.amount !== undefined
+        //             ? request.amount
+        //             : request[3];
+
+        //     const amount = Number(
+        //         Web3.utils.fromWei(
+        //             String(rawAmount),
+        //             "ether"
+        //         )
+        //     );
+
+        //     totalVolume += amount;
+
+        //     const row = document.createElement("tr");
+
+        //     row.innerHTML = `
+        //         <td>
+        //             <span class="badge bg-secondary">
+        //                 #${escapeHtml(id)}
+        //             </span>
+        //         </td>
+
+        //         <td class="font-monospace">
+        //             ${escapeHtml(shortAddress(wallet))}
+        //         </td>
+
+        //         <td class="fw-bold text-success">
+        //             $${amount.toFixed(2)} USDT
+        //         </td>
+
+        //         <td>
+        //             #${escapeHtml(requestIndex)}
+        //         </td>
+
+        //         <td>
+        //             <button
+        //                 type="button"
+        //                 class="btn btn-success btn-sm"
+        //                 onclick="PHGH.openPhConfirm({
+        //                     id:'${escapeHtml(id)}',
+        //                     amount:'${amount}',
+        //                     wallet:'${escapeHtml(wallet)}'
+        //                 })">
+
+        //                 <i class="bi bi-hand-thumbs-up me-1"></i>
+        //                 Provide Help
+        //             </button>
+        //         </td>
+        //     `;
+
+        //     tbody.appendChild(row);
+        // });
+
+
+requests.forEach((request, index) => {
+
+    const id =
+        request.id !== undefined
+            ? request.id
+            : request[0];
+
+    const wallet =
+        request.user !== undefined
+            ? request.user
+            : request[1];
+
+    const requestIndex =
+        request.requestIndex !== undefined
+            ? request.requestIndex
+            : request[2];
+
+    const rawAmount =
+        request.amount !== undefined
+            ? request.amount
+            : request[3];
+
+    const amount = Number(
+        Web3.utils.fromWei(
+            String(rawAmount),
+            "ether"
+        )
+    );
+
+    totalVolume += amount;
+
+    // ============================================
+    // ONLY FIRST ROW ENABLED
+    // ============================================
+
+    const isFirstRow = index === 0;
+
+    const buttonDisabled = !isFirstRow;
+
+    const buttonClass = isFirstRow
+        ? "btn btn-success btn-sm"
+        : "btn btn-secondary btn-sm";
+
+    const buttonStyle = isFirstRow
+        ? ""
+        : "opacity:0.55;cursor:not-allowed;";
+
+    const buttonText = isFirstRow
+        ? "Provide Help"
+        : "Provide Help";
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>
+            <span class="badge bg-secondary">
+                #${escapeHtml(id)}
+            </span>
+        </td>
+
+        <td class="font-monospace">
+            ${escapeHtml(shortAddress(wallet))}
+        </td>
+
+        <td class="fw-bold text-success">
+            $${amount.toFixed(2)} USDT
+        </td>
+
+        <td>
+            #${escapeHtml(requestIndex)}
+        </td>
+
+        <td>
+            <button
+                type="button"
+                class="${buttonClass}"
+                style="${buttonStyle}"
+                ${buttonDisabled ? "disabled" : ""}
+                onclick="PHGH.openPhConfirm({
+                    id:'${escapeHtml(id)}',
+                    amount:'${amount}',
+                    wallet:'${escapeHtml(wallet)}'
+                })">
+
+                <i class="bi bi-hand-thumbs-up me-1"></i>
+                ${buttonText}
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+});
+
+
+
+        // ============================================
+        // UPDATE STATS
+        // ============================================
+
+        document.getElementById("phStatActive").innerText =
+            requests.length;
+
+        document.getElementById("phStatVolume").innerText =
+            totalVolume.toFixed(2);
+
+        document.getElementById("phCounter").innerText =
+            requests.length + " / " + requests.length;
+
+    } catch(error) {
+
+        console.error(
+            "PH Request Error:",
+            error
+        );
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger py-4">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Unable to load PH requests.
+                </td>
+            </tr>
+        `;
+
+        document.getElementById("phStatActive").innerText = "0";
+        document.getElementById("phStatVolume").innerText = "0.00";
+        document.getElementById("phCounter").innerText = "0 / 0";
     }
+}
+
+
+
+
+
+
+
 
     /*
      * Open Bootstrap confirmation popup.
      */
-    function openPhConfirm(request){
+    // function openPhConfirm(request){
+
+    //     selectedPh = request;
+
+    //     document.getElementById('confirmPhId').textContent =
+    //         '#' + request.id;
+
+    //     document.getElementById('confirmPhAmount').textContent =
+    //         Number(request.amount).toFixed(2) + ' USDT';
+
+    //     document.getElementById('confirmPhWallet').textContent =
+    //         shortAddress(request.wallet);
+
+    //     const modal = bootstrap.Modal.getOrCreateInstance(
+    //         document.getElementById('phConfirmModal')
+    //     );
+
+    //     modal.show();
+    // }
+
+
+
+function openPhConfirm(request){
+
+    // ============================================
+    // GET CONNECTED WALLET
+    // ============================================
+
+    getCurrentAccount().then(function(account){
+
+        if(!account){
+            showToast(
+                "Please connect your wallet.",
+                "error"
+            );
+            return;
+        }
+
+        // ========================================
+        // OWN WALLET CHECK
+        // ========================================
+
+        if(
+            request.wallet &&
+            account.toLowerCase() === request.wallet.toLowerCase()
+        ){
+
+            showToast(
+                "Cannot fulfil own GH request",
+                "error"
+            );
+
+            return;
+        }
+
+        // ========================================
+        // VALID REQUEST
+        // ========================================
 
         selectedPh = request;
 
@@ -436,7 +779,22 @@
         );
 
         modal.show();
-    }
+
+    }).catch(function(error){
+
+        console.error(
+            "Wallet check error:",
+            error
+        );
+
+        showToast(
+            "Unable to verify connected wallet.",
+            "error"
+        );
+    });
+}
+
+
 
     /*
      * Open Provide Help directly when the queue display is empty.
@@ -461,15 +819,6 @@
         modal.show();
     }
 
-    /*
-     * CONFIRM PROVIDE HELP
-     *
-     * userCycle(account) -> initialPHCount
-     *
-     * initialPHCount 0 / 1 -> provideInitialHelp()
-     * initialPHCount 2    -> provideHelp()
-     * initialPHCount 3    -> provideAdminPH()
-     */
     async function confirmPh(){
 
         if(isProvidingHelp || !selectedPh){
