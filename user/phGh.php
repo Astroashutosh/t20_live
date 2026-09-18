@@ -79,7 +79,7 @@
                             <div class="phgh-stat__label">Active Requests</div>
                             <div class="phgh-stat__icon"><i class="bi bi-activity"></i></div>
                         </div>
-                        <div class="phgh-stat__value" id="phStatActive">5</div>
+                        <div class="phgh-stat__value" id="phStatActive">0.00</div>
                         <div class="phgh-stat__hint">Available to provide help</div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                             <div class="phgh-stat__label">Available Volume</div>
                             <div class="phgh-stat__icon"><i class="bi bi-wallet2"></i></div>
                         </div>
-                        <div class="phgh-stat__value" id="phStatVolume">1,300</div>
+                        <div class="phgh-stat__value" id="phStatVolume">0.00</div>
                         <div class="phgh-stat__hint">Total active PH amount</div>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                         </div>
                     </div>
 
-                    <div class="phgh-counter" id="phCounter">5 / 5</div>
+                    <div class="phgh-counter" id="phCounter">0 / 0</div>
                 </div>
 
                 <div id="phList"></div>
@@ -298,10 +298,6 @@ async function renderPH(){
 
         console.log("GH Queue Head:", currentId);
 
-        // ============================================
-        // NO REQUEST
-        // ============================================
-
         if (!currentId || currentId === 0) {
 
             tbody.innerHTML = `
@@ -352,114 +348,47 @@ async function renderPH(){
             return;
         }
 
-        // ============================================
-        // GET REQUESTS
-        //
-        // ghQueueHead = 10
-        //
-        // ghRequests(10)
-        // ghRequests(11)
-        // ghRequests(12)
-        // ghRequests(13)
-        // ...
-        //
-        // jab request nahi milegi -> STOP
-        // ============================================
 
-        const requests = [];
+const requests = [];
 
-        let safetyCounter = 0;
+console.log("Checking only GH Queue Head ID:", currentId);
 
-        while (true) {
+try {
 
-            safetyCounter++;
+    const request = await mainContract.methods
+        .ghRequests(currentId)
+        .call();
 
-            // Safety protection
-            if (safetyCounter > 1000) {
-                console.warn(
-                    "PH loop stopped because safety limit reached."
-                );
-                break;
-            }
+    console.log(
+        "ghRequests(" + currentId + "):",
+        request
+    );
 
-            console.log(
-                "Checking GH Request ID:",
-                currentId
-            );
+    const id =
+        request.id !== undefined
+            ? request.id
+            : request[0];
 
-            try {
+    if (
+        id !== undefined &&
+        id !== null &&
+        String(id) !== "0"
+    ) {
+        requests.push(request);
+    }
 
-                const request = await mainContract.methods
-                    .ghRequests(currentId)
-                    .call();
+} catch (error) {
 
-                console.log(
-                    "ghRequests(" + currentId + "):",
-                    request
-                );
-
-                // ========================================
-                // GET REQUEST ID
-                // ========================================
-
-                const id =
-                    request.id !== undefined
-                        ? request.id
-                        : request[0];
-
-                // ========================================
-                // NO VALUE -> STOP LOOP
-                // ========================================
-
-                if (
-                    id === undefined ||
-                    id === null ||
-                    String(id) === "0"
-                ) {
-
-                    console.log(
-                        "No more GH requests at ID:",
-                        currentId
-                    );
-
-                    break;
-                }
-
-                // ========================================
-                // VALID REQUEST
-                // ========================================
-
-                requests.push(request);
-
-                // ========================================
-                // IMPORTANT:
-                // NO ghQueueNext()
-                //
-                // Just increment ID
-                // ========================================
-
-                currentId++;
-
-            } catch (error) {
-
-                console.log(
-                    "Stopped at GH Request ID:",
-                    currentId,
-                    error
-                );
-
-                break;
-            }
-        }
-
+    console.error(
+        "GH Request Error for ID:",
+        currentId,
+        error
+    );
+}
         console.log(
             "Total GH Requests:",
             requests.length
         );
-
-        // ============================================
-        // NO HISTORY
-        // ============================================
 
         if (requests.length === 0) {
 
@@ -480,89 +409,12 @@ async function renderPH(){
             return;
         }
 
-        // ============================================
-        // CLEAR LOADING
-        // ============================================
-
+    
         tbody.innerHTML = "";
 
         let totalVolume = 0;
 
-        // ============================================
-        // SHOW ALL REQUESTS
-        // ============================================
-
-        // requests.forEach((request) => {
-
-        //     const id =
-        //         request.id !== undefined
-        //             ? request.id
-        //             : request[0];
-
-        //     const wallet =
-        //         request.user !== undefined
-        //             ? request.user
-        //             : request[1];
-
-        //     const requestIndex =
-        //         request.requestIndex !== undefined
-        //             ? request.requestIndex
-        //             : request[2];
-
-        //     const rawAmount =
-        //         request.amount !== undefined
-        //             ? request.amount
-        //             : request[3];
-
-        //     const amount = Number(
-        //         Web3.utils.fromWei(
-        //             String(rawAmount),
-        //             "ether"
-        //         )
-        //     );
-
-        //     totalVolume += amount;
-
-        //     const row = document.createElement("tr");
-
-        //     row.innerHTML = `
-        //         <td>
-        //             <span class="badge bg-secondary">
-        //                 #${escapeHtml(id)}
-        //             </span>
-        //         </td>
-
-        //         <td class="font-monospace">
-        //             ${escapeHtml(shortAddress(wallet))}
-        //         </td>
-
-        //         <td class="fw-bold text-success">
-        //             $${amount.toFixed(2)} USDT
-        //         </td>
-
-        //         <td>
-        //             #${escapeHtml(requestIndex)}
-        //         </td>
-
-        //         <td>
-        //             <button
-        //                 type="button"
-        //                 class="btn btn-success btn-sm"
-        //                 onclick="PHGH.openPhConfirm({
-        //                     id:'${escapeHtml(id)}',
-        //                     amount:'${amount}',
-        //                     wallet:'${escapeHtml(wallet)}'
-        //                 })">
-
-        //                 <i class="bi bi-hand-thumbs-up me-1"></i>
-        //                 Provide Help
-        //             </button>
-        //         </td>
-        //     `;
-
-        //     tbody.appendChild(row);
-        // });
-
+ 
 
 requests.forEach((request, index) => {
 
@@ -701,37 +553,9 @@ requests.forEach((request, index) => {
 
 
 
-    /*
-     * Open Bootstrap confirmation popup.
-     */
-    // function openPhConfirm(request){
-
-    //     selectedPh = request;
-
-    //     document.getElementById('confirmPhId').textContent =
-    //         '#' + request.id;
-
-    //     document.getElementById('confirmPhAmount').textContent =
-    //         Number(request.amount).toFixed(2) + ' USDT';
-
-    //     document.getElementById('confirmPhWallet').textContent =
-    //         shortAddress(request.wallet);
-
-    //     const modal = bootstrap.Modal.getOrCreateInstance(
-    //         document.getElementById('phConfirmModal')
-    //     );
-
-    //     modal.show();
-    // }
-
-
-
 function openPhConfirm(request){
 
-    // ============================================
-    // GET CONNECTED WALLET
-    // ============================================
-
+ 
     getCurrentAccount().then(function(account){
 
         if(!account){
@@ -741,10 +565,6 @@ function openPhConfirm(request){
             );
             return;
         }
-
-        // ========================================
-        // OWN WALLET CHECK
-        // ========================================
 
         if(
             request.wallet &&
@@ -758,10 +578,6 @@ function openPhConfirm(request){
 
             return;
         }
-
-        // ========================================
-        // VALID REQUEST
-        // ========================================
 
         selectedPh = request;
 

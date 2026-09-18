@@ -1110,10 +1110,48 @@
 <script>
 (function () {
 
+    /*
+    ============================================================
+    REAL T20 STAKING CONTRACT
+
+    stakingContract
+        -> T20Staking contract
+
+    oldToken
+        -> OLD T20 ERC20 token
+
+    staking_contract
+        -> staking contract address
+
+    Contract functions used:
+
+        oldT20Token()
+        newT20Token()
+
+        stake(amount)
+
+        claimReward()
+
+        getUserInfo(address)
+
+        canClaim(address)
+
+        nextClaimTime(address)
+
+        pendingReward(address)
+
+        timeUntilClaim(address)
+
+        getUserStakeLogIds(address)
+
+        getStakeLog(id)
+
+    ============================================================
+    */
+
     const DECIMALS = 18;
     const CLAIM_PERIOD = 15 * 24 * 60 * 60;
     const REWARD_PERCENT = 10;
-
 
 
     function toast(message, error = false) {
@@ -1165,6 +1203,22 @@
     }
 
 
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/[&<>"']/g, function (c) {
+
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[c];
+
+            });
+
+    }
 
 
     function money(value) {
@@ -1337,10 +1391,10 @@
             if (!account) {
 
                 $("#stakeWalletBalance")
-                    .text("0 ");
+                    .text("0 OLD");
 
                 $("#stakeAvailable")
-                    .text("0 ");
+                    .text("0 OLD");
 
                 return 0;
 
@@ -1357,10 +1411,10 @@
 
 
             $("#stakeWalletBalance")
-                .text(money(balance) );
+                .text(money(balance) + " OLD");
 
             $("#stakeAvailable")
-                .text(money(balance) );
+                .text(money(balance) + " OLD");
 
 
             return balance;
@@ -1483,10 +1537,10 @@
     function resetMetrics() {
 
         $("#stakeTotal")
-            .text("0 ");
+            .text("0 OLD");
 
         $("#stakeCapital")
-            .text("0 ");
+            .text("0 OLD");
 
         $("#stakeNextClaim")
             .text("--");

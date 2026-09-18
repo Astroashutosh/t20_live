@@ -1,6 +1,6 @@
-const main_contract = "0xe8fa5f4a23ee00D41480c94432928D26f4DA3d24";
-// const staking_contract = "0x2e943d2Eb028C5c613b741902906071C597dE41b";
-const staking_contract = "0x01734DC7F66c82280e82b8f63234b44A54EcfE5B";
+const main_contract = "0x5d6a58bFb9780a750794f1f2f015aA7dd3cfb233";
+
+const staking_contract = "0xcFDA0579687D538478dcf6D52BFdAC9b5B82371a";
 
 const usdt_addr = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
 const token_addr = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
@@ -795,7 +795,7 @@ async function logintoaccount() {
 }
 async function loginprocess(address) {
     const userdata = await mainContract.methods.userBase(address).call();
-    if (userdata) {
+    if (userdata.registered) {
         var newForm = jQuery('<form>', {
             'action': $('#baseurl').val() + 'postdata.php',
             'method': 'post'
