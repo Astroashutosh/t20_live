@@ -1,4 +1,4 @@
-```php
+
 <?php include('header.php'); ?>
 
 <style>
@@ -588,6 +588,33 @@
         font-size:8px
     }
 }
+
+
+
+.history-switch-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+
+    .stake-history-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+    }
+
+    .history-switch-buttons {
+        width: 100%;
+    }
+
+    .history-switch-buttons .btn {
+        flex: 1;
+    }
+}
+
 </style>
 
 
@@ -756,7 +783,7 @@
 
             <div class="glass-card stake-metric purple dash-reveal">
 
-                <div class="stake-metric__label">
+                <!-- <div class="stake-metric__label">
                     Next Reward
                 </div>
 
@@ -768,7 +795,24 @@
 
                 <div class="stake-metric__hint">
                     10% after 15 days
-                </div>
+                </div> -->
+
+<div class="stake-metric__label">
+    Reward Available
+</div>
+
+<div
+    class="stake-metric__value"
+    id="stakeNextClaim">
+    10%
+</div>
+
+<div class="stake-metric__hint">
+    Claim anytime
+</div>
+
+
+
 
                 <div class="stake-metric__icon">
                     <i class="bi bi-gift"></i>
@@ -784,60 +828,73 @@
 
             <div class="stake-workspace-head">
 
-                <div class="stake-workspace-title">
+            <div class="stake-history-header">
 
-                    <div class="stake-workspace-icon">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
+    <div>
+        <h5 id="historyTitle">Staking History</h5>
 
-                    <div>
+       
+    </div>
 
-                        <h5>Stake History</h5>
+    <div class="history-switch-buttons">
 
-                        <p>
-                            All staking transactions loaded directly
-                            from the T20 staking contract.
-                        </p>
+        <button
+            type="button"
+            id="stakingHistoryBtn"
+            class="btn btn-veri-primary btn-sm"
+            onclick="STAKING_PAGE.showStakingHistory()">
 
-                    </div>
+            <i class="bi bi-lock-fill me-1"></i>
+            Staking History
 
-                </div>
+        </button>
+
+        <button
+            type="button"
+            id="claimHistoryBtn"
+            class="btn btn-veri-outline btn-sm"
+            onclick="STAKING_PAGE.showClaimHistory()">
+
+            <i class="bi bi-gift me-1"></i>
+            Claim History
+
+        </button>
+
+    </div>
+
+</div>
+
+            <div class="stake-head-actions">
 
 
-                <div class="stake-head-actions">
 
-                    <div class="stake-count">
-                        <span id="stakeHistoryCount">0</span>
-                        Stakes
-                    </div>
+    <button
+        type="button"
+        class="btn btn-veri-primary btn-sm"
+        onclick="STAKING_PAGE.openModal()">
 
-                    <button
-                        type="button"
-                        class="btn btn-veri-primary btn-sm"
-                        onclick="STAKING_PAGE.openModal()">
+        <i class="bi bi-plus-circle me-1"></i>
+        Stake Now
 
-                        <i class="bi bi-plus-circle me-1"></i>
-                        Stake Now
+    </button>
 
-                    </button>
+    <button
+        type="button"
+        id="claimRewardBtn"
+        class="btn btn-veri-outline btn-sm"
+        onclick="STAKING_PAGE.claimReward()">
 
-                    <button
-                        type="button"
-                        id="claimRewardBtn"
-                        class="btn btn-veri-outline btn-sm"
-                        onclick="STAKING_PAGE.claimReward()">
+        <i class="bi bi-gift me-1"></i>
+        Claim Reward
 
-                        <i class="bi bi-gift me-1"></i>
-                        Claim Reward
+    </button>
 
-                    </button>
-
-                </div>
+</div>
 
             </div>
 
 
-            <div class="stake-table-head">
+            <div class="stake-table-head"   id="historyTableHead">
 
                 <span>Stake</span>
                 <span>Amount</span>
@@ -876,18 +933,6 @@
 
             </div>
 
-
-            <div class="phgh-info-pro mt-2">
-
-                <i class="bi bi-shield-check"></i>
-
-                <span>
-                    Blockchain staking is active. Balance, staking,
-                    rewards and history are read directly from the
-                    smart contract.
-                </span>
-
-            </div>
 
         </div>
 
@@ -1357,7 +1402,7 @@
 
 
             const raw =
-                await oldToken.methods
+                await usdtContract.methods
                     .balanceOf(account)
                     .call();
 
@@ -1573,39 +1618,88 @@
     }
 
 
-    async function loadClaimStatus() {
+    // async function loadClaimStatus() {
 
-        try {
+    //     try {
 
-            const account =
-                await getAccountSafe();
+    //         const account =
+    //             await getAccountSafe();
 
-            if (!account) return;
-
-
-            const canClaim =
-                await stakingContract.methods
-                    .canClaim(account)
-                    .call();
+    //         if (!account) return;
 
 
-            $("#claimRewardBtn")
-                .prop(
-                    "disabled",
-                    !canClaim
-                );
+    //         const canClaim =
+    //             await stakingContract.methods
+    //                 .canClaim(account)
+    //                 .call();
 
 
-        } catch (error) {
+    //         $("#claimRewardBtn")
+    //             .prop(
+    //                 "disabled",
+    //                 !canClaim
+    //             );
 
-            console.error(
-                "Claim status error:",
-                error
-            );
 
+    //     } catch (error) {
+
+    //         console.error(
+    //             "Claim status error:",
+    //             error
+    //         );
+
+    //     }
+
+    // }
+
+
+async function loadClaimStatus() {
+
+    try {
+
+        const account = await getAccountSafe();
+
+        if (!account) {
+            $("#claimRewardBtn").prop("disabled", true);
+            return;
         }
 
+        const user = await stakingContract.methods
+            .getUserInfo(account)
+            .call();
+
+        const active =
+            user.active !== undefined
+                ? user.active
+                : user[5];
+
+        const capital =
+            user.capital !== undefined
+                ? user.capital
+                : user[1];
+
+        const hasCapital =
+            Number(capital) > 0;
+
+        $("#claimRewardBtn").prop(
+            "disabled",
+            !(active && hasCapital)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Claim status error:",
+            error
+        );
+
+        $("#claimRewardBtn").prop(
+            "disabled",
+            true
+        );
     }
+}
+
 
 
     async function loadPendingReward() {
@@ -2055,11 +2149,8 @@
                 );
 
 
-            /*
-             * Check OLD TOKEN balance
-             */
             const rawBalance =
-                await oldToken.methods
+                await usdtContract.methods
                     .balanceOf(account)
                     .call();
 
@@ -2104,11 +2195,8 @@
             }
 
 
-            /*
-             * Read current allowance
-             */
             const allowance =
-                await oldToken.methods
+                await usdtContract.methods
                     .allowance(
                         account,
                         staking_contract
@@ -2120,9 +2208,6 @@
                 await getGasPriceSafe();
 
 
-            /*
-             * APPROVAL
-             */
             if (
                 window.BigNumber
                     ? new BigNumber(
@@ -2143,7 +2228,7 @@
 
 
                 const approveTx =
-                    oldToken.methods
+                    usdtContract.methods
                         .approve(
                             staking_contract,
                             amount
@@ -2372,43 +2457,43 @@
                     .call();
 
 
-            if (!canClaim) {
+            // if (!canClaim) {
 
-                const remaining =
-                    await stakingContract.methods
-                        .timeUntilClaim(account)
-                        .call();
-
-
-                const seconds =
-                    Number(remaining || 0);
+            //     const remaining =
+            //         await stakingContract.methods
+            //             .timeUntilClaim(account)
+            //             .call();
 
 
-                const days =
-                    Math.floor(
-                        seconds / 86400
-                    );
+            //     const seconds =
+            //         Number(remaining || 0);
 
 
-                const hours =
-                    Math.floor(
-                        (seconds % 86400) /
-                        3600
-                    );
+            //     const days =
+            //         Math.floor(
+            //             seconds / 86400
+            //         );
 
 
-                toast(
-                    "Claim is not available yet. " +
-                    days +
-                    "d " +
-                    hours +
-                    "h remaining.",
-                    true
-                );
+            //     const hours =
+            //         Math.floor(
+            //             (seconds % 86400) /
+            //             3600
+            //         );
 
-                return;
 
-            }
+            //     toast(
+            //         "Claim is not available yet. " +
+            //         days +
+            //         "d " +
+            //         hours +
+            //         "h remaining.",
+            //         true
+            //     );
+
+            //     return;
+
+            // }
 
 
             const rewardRaw =
@@ -2619,6 +2704,479 @@
         await loadHistory();
 
     }
+    
+
+
+
+
+
+
+
+
+
+
+// claim history
+
+
+
+
+async function loadClaimHistory() {
+
+    const list =
+        document.getElementById("stakeList");
+
+    const empty =
+        document.getElementById("stakeEmpty");
+
+    if (!list || !empty) return;
+
+    list.innerHTML = `
+        <div
+            class="text-center text-secondary py-5"
+            style="font-size:10px">
+
+            <span class="spinner-border spinner-border-sm me-2"></span>
+
+            Loading claim history...
+
+        </div>
+    `;
+
+    empty.style.display = "none";
+
+
+    try {
+
+        const account =
+            await getCurrentAccount();
+
+        if (!account) {
+
+            list.innerHTML = "";
+
+            empty.style.display = "flex";
+
+            return;
+        }
+
+
+        /*
+         * Get user's claim IDs directly
+         * from staking contract
+         */
+        const ids =
+            await stakingContract.methods
+                .getUserClaimLogIds(account)
+                .call();
+
+
+      if (!ids || ids.length === 0) {
+
+    list.innerHTML = "";
+    empty.style.display = "flex";
+
+    const historyCount =
+        document.getElementById("stakeHistoryCount");
+
+    if (historyCount) {
+        historyCount.innerText = "0";
+    }
+
+    return;
+}
+
+
+        const rows = [];
+
+
+        /*
+         * Latest claim first
+         */
+        for (
+            let i = ids.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            const claimId =
+                ids[i];
+
+
+            try {
+
+                const claim =
+                    await stakingContract.methods
+                        .getClaimLog(claimId)
+                        .call();
+
+
+                rows.push(
+                    renderClaimRow(
+                        claimId,
+                        claim
+                    )
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Claim log error:",
+                    claimId,
+                    error
+                );
+
+            }
+
+        }
+
+
+        list.innerHTML =
+            rows.join("");
+
+
+        empty.style.display =
+            rows.length
+                ? "none"
+                : "flex";
+
+
+const historyCount =
+    document.getElementById("stakeHistoryCount");
+
+if (historyCount) {
+    historyCount.innerText = rows.length;
+}
+
+
+        // document.getElementById(
+        //     "stakeHistoryCount"
+        // ).innerText = rows.length;
+
+
+    } catch (error) {
+
+        console.error(
+            "Claim history error:",
+            error
+        );
+
+
+        list.innerHTML = `
+            <div
+                class="text-center text-danger py-5"
+                style="font-size:10px">
+
+                Unable to load claim history.
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+
+function renderClaimRow(
+    claimId,
+    claim
+) {
+
+    const cycle =
+        claim.cycle !== undefined
+            ? claim.cycle
+            : claim[1];
+
+    const capitalBeforeRaw =
+        claim.capitalBefore !== undefined
+            ? claim.capitalBefore
+            : claim[2];
+
+    const rewardRaw =
+        claim.reward !== undefined
+            ? claim.reward
+            : claim[3];
+
+    const capitalAfterRaw =
+        claim.capitalAfter !== undefined
+            ? claim.capitalAfter
+            : claim[4];
+
+    const timestamp =
+        claim.timestamp !== undefined
+            ? claim.timestamp
+            : claim[5];
+
+
+    const capitalBefore =
+        tokenToNumber(
+            capitalBeforeRaw
+        );
+
+    const reward =
+        tokenToNumber(
+            rewardRaw
+        );
+
+    const capitalAfter =
+        tokenToNumber(
+            capitalAfterRaw
+        );
+
+
+    const date =
+        new Date(
+            Number(timestamp) * 1000
+        );
+
+
+    const dateText =
+        date.toLocaleDateString(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+
+    const timeText =
+        date.toLocaleTimeString(
+            "en-US",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    return `
+        <div class="stake-row">
+
+            <div class="stake-row-main">
+
+                <small>
+                    CLAIM #${escapeHtml(claimId)}
+                </small>
+
+                <strong>
+                    CYCLE ${escapeHtml(cycle)}
+                </strong>
+
+            </div>
+
+
+            <div class="stake-amount">
+
+                <span class="stake-token">
+                    N
+                </span>
+
+                <span
+                    style="color:var(--s-green)">
+                    +${money(reward)} NEW
+                </span>
+
+            </div>
+
+
+            <div class="stake-cell">
+
+                <strong>
+                    ${escapeHtml(dateText)}
+                </strong>
+
+                <small>
+                    ${escapeHtml(timeText)}
+                </small>
+
+            </div>
+
+
+            <div class="stake-cell">
+
+                <strong>
+                    ${money(capitalBefore)} OLD
+                </strong>
+
+                <small>
+                    After:
+                    ${money(capitalAfter)} OLD
+                </small>
+
+            </div>
+
+
+            <div>
+
+                <span class="stake-status">
+                    CLAIMED
+                </span>
+
+                <small
+                    style="
+                        display:block;
+                        color:#64716e;
+                        font-size:7px;
+                        margin-top:4px;
+                    ">
+
+                    On-chain
+
+                </small>
+
+            </div>
+
+
+            <div class="stake-action">
+
+                <span
+                    class="btn btn-veri-outline"
+                    style="
+                        cursor:default;
+                        opacity:.8;
+                    ">
+
+                    <i class="bi bi-check-circle me-1"></i>
+
+                    Completed
+
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+
+
+
+
+
+async function showClaimHistory() {
+
+    document.getElementById(
+        "historyTitle"
+    ).innerText = "Claim History";
+
+
+
+
+
+    document.getElementById(
+        "historyTableHead"
+    ).innerHTML = `
+        <span>Claim</span>
+        <span>Reward</span>
+        <span>Date</span>
+        <span>Capital</span>
+        <span>Status</span>
+        <span>Action</span>
+    `;
+
+
+    document.getElementById(
+        "claimHistoryBtn"
+    ).classList.remove(
+        "btn-veri-outline"
+    );
+
+    document.getElementById(
+        "claimHistoryBtn"
+    ).classList.add(
+        "btn-veri-primary"
+    );
+
+
+    document.getElementById(
+        "stakingHistoryBtn"
+    ).classList.remove(
+        "btn-veri-primary"
+    );
+
+    document.getElementById(
+        "stakingHistoryBtn"
+    ).classList.add(
+        "btn-veri-outline"
+    );
+
+
+    await loadClaimHistory();
+
+}
+
+
+
+
+
+async function showStakingHistory() {
+
+    document.getElementById(
+        "historyTitle"
+    ).innerText = "Staking History";
+
+
+
+
+
+    document.getElementById(
+        "historyTableHead"
+    ).innerHTML = `
+        <span>Stake</span>
+        <span>Amount</span>
+        <span>Date</span>
+        <span>Capital</span>
+        <span>Status</span>
+        <span>Action</span>
+    `;
+
+
+    document.getElementById(
+        "stakingHistoryBtn"
+    ).classList.remove(
+        "btn-veri-outline"
+    );
+
+    document.getElementById(
+        "stakingHistoryBtn"
+    ).classList.add(
+        "btn-veri-primary"
+    );
+
+
+    document.getElementById(
+        "claimHistoryBtn"
+    ).classList.remove(
+        "btn-veri-primary"
+    );
+
+    document.getElementById(
+        "claimHistoryBtn"
+    ).classList.add(
+        "btn-veri-outline"
+    );
+
+
+    await loadHistory();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     document.addEventListener(
@@ -2707,10 +3265,10 @@
                                 : user[5];
 
 
-                        updateNextClaim(
-                            lastClaim,
-                            active
-                        );
+                        // updateNextClaim(
+                        //     lastClaim,
+                        //     active
+                        // );
 
 
                     } catch (error) {
@@ -2730,16 +3288,37 @@
     );
 
 
-    window.STAKING_PAGE = {
+window.STAKING_PAGE = {
 
-        openModal,
-        setMax,
-        claimReward,
-        stakeNow
+    openModal,
+    setMax,
+    claimReward,
+    stakeNow,
 
-    };
+    showStakingHistory,
+    showClaimHistory
+
+};
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 

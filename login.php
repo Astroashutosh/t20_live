@@ -56,7 +56,7 @@
 
                 <button type="button" class="btn btn-veri-outline" onclick="addUSDTToken()">
                     <i class="bi bi-coin me-2"></i>
-                    Add T20M Token
+                    Add T20 Token
                 </button>
             </div>
             <button onclick="logintoaccount()" class="btn btn-veri-primary w-100 btn-lg" id="loginBtn"><i class="bi bi-box-arrow-in-right me-2"></i>Log In</button>
@@ -108,8 +108,8 @@ async function addBSCNetwork() {
         await ethereum.request({
             method: "wallet_addEthereumChain",
             params: [{
-                chainId: "0x61", // 97
-                chainName: "BNB Smart Chain Testnet",
+                chainId: "0x38", // 97
+                chainName: "BNB Smart Chain",
                 nativeCurrency: {
                     name: "tBNB",
                     symbol: "tBNB",
@@ -119,7 +119,7 @@ async function addBSCNetwork() {
                     "https://data-seed-prebsc-1-s1.binance.org:8545/"
                 ],
                 blockExplorerUrls: [
-                    "https://testnet.bscscan.com"
+                    "https://bscscan.com"
                 ]
             }]
         });
@@ -144,15 +144,15 @@ async function addUSDTToken() {
             params: {
                 type: "ERC20",
                 options: {
-                    address: "0xB7fE3f419C675bB830759a59b6Edc26C88e854FD",
-                    symbol: "T20M",
+                    address: "0xFe9a3855ea58eEC5bcc2CdA59F4592CBE908d101",
+                    symbol: "T20",
                     decimals: 18,
                    // image: "https://cryptologos.cc/logos/tether-usdt-logo.png"
                 }
             }
         });
 
-        toastr.success("T20M token added.");
+        toastr.success("T20 token added.");
 
     } catch (err) {
         console.log(err);

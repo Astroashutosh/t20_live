@@ -1,11 +1,15 @@
-const main_contract = "0x5d6a58bFb9780a750794f1f2f015aA7dd3cfb233";
+// const main_contract = "0x5d6a58bFb9780a750794f1f2f015aA7dd3cfb233";
+// const staking_contract = "0xcFDA0579687D538478dcf6D52BFdAC9b5B82371a";
+// const usdt_addr = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
 
-const staking_contract = "0xcFDA0579687D538478dcf6D52BFdAC9b5B82371a";
 
-const usdt_addr = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
-const token_addr = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
-const pair_addr = "0xf07c3e75b9f9640f2030011bb158938e9df7dd44";
-const router = "0xb0853aDb21765fb2B80558097373DD89CC43F797";
+const main_contract = "0xc9E540D1ee33c37cfB0092537169719c4a4d3279";
+const staking_contract = "0x86fD90EFBe921630D155a4AD858021cD399Fc19c";
+const usdt_addr = "0x55d398326f99059fF775485246999027B3197955";
+
+const token_addr = "0xFe9a3855ea58eEC5bcc2CdA59F4592CBE908d101";
+const pair_addr = "0xc2343e103bdd01d9d7b3b90a15bcaef3f1fcde75";
+const router = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const p = new Web3(window.ethereum);
 const mainContract = new p.eth.Contract(e, main_contract);
 const stakingContract = new p.eth.Contract(stakingABI, staking_contract);
@@ -16,23 +20,49 @@ const routerContract = new p.eth.Contract(routerABI, router);
 
 
 
-// OLD TOKEN CONTRACT
-// let oldToken = null;
 
-// async function initOldTokenContract() {
-//     try {
-//         const oldTokenAddress = await mainContract.methods.oldToken().call();
+// staking contract
 
-//         oldToken = new p.eth.Contract(token, oldTokenAddress);
+let oldTokenContract = null;
+let newTokenContract = null;
 
-//         console.log("Old Token Address:", oldTokenAddress);
+async function initStakingTokens() {
+    try {
+        const oldTokenAddress =
+            await stakingContract.methods
+                .oldT20Token()
+                .call();
 
-//         return oldToken;
-//     } catch (error) {
-//         console.error("Old token contract initialization error:", error);
-//         throw error;
-//     }
-// }
+        const newTokenAddress =
+            await stakingContract.methods
+                .newT20Token()
+                .call();
+
+        oldTokenContract = new p.eth.Contract(old_token, oldTokenAddress );
+
+        newTokenContract =
+            new p.eth.Contract(
+                old_token,
+                newTokenAddress
+            );
+
+        console.log("OLD TOKEN:", oldTokenAddress);
+        console.log("NEW TOKEN:", newTokenAddress);
+
+        return {
+            oldTokenAddress,
+            newTokenAddress
+        };
+
+    } catch (error) {
+        console.error(
+            "Staking token initialization error:",
+            error
+        );
+
+        throw error;
+    }
+}
 
 
 
@@ -85,15 +115,15 @@ async function getAccount() {
           $(".connected_walletdash").html(account.substring(0, 6) + "..." + account.substring(account.length - 4));
           $("#connected_wallet").val(account.substring(0, 6) + "..." + account.substring(account.length - 4));
           $("#connectWalletBtn").html('<i class="bi bi-check-circle me-2"></i>Connected').prop("disabled", true);
-          $(".contract-info").html("<a style='color:black' href='https://testnet.bscscan.com/address/" + main_contract + "' target='_blank'>" + main_contract.substring(0, 5) + "..." + main_contract.substring(39) + " <i class='fa fa-link'></i> </a>");
-          $(".contract_scan").attr("href", `https://testnet.bscscan.com/address/${main_contract}`);
-          $(".token_scan").attr("href", `https://testnet.bscscan.com/token/${token_addr}`);
+          $(".contract-info").html("<a style='color:black' href='https://bscscan.com/address/" + main_contract + "' target='_blank'>" + main_contract.substring(0, 5) + "..." + main_contract.substring(39) + " <i class='fa fa-link'></i> </a>");
+          $(".contract_scan").attr("href", `https://bscscan.com/address/${main_contract}`);
+          $(".token_scan").attr("href", `https://bscscan.com/token/${token_addr}`);
           $(".dextools_link").attr("href", `https://www.dextools.io/app/bnb/pair-explorer/${pair_addr}`);
           const chainId = await ethereum.request({
               method: 'eth_chainId'
           });
           var numericChainID = Web3.utils.hexToNumber(chainId);
-          if (numericChainID == 97) {
+          if (numericChainID == 56) {
               // const user_details = await mainContract.methods.userBase(account).call();
               // const user_income_details = 0;
               // const user_income_details_extra = 0;
@@ -127,6 +157,8 @@ async function getAccount() {
             // $('.activeDirectReferrals').text(user_details['activeDirectReferrals']);
             if (user_details['active']) {
                 $('.isActive').text('Active');
+                $('.isActive').removeClass('badge-failed');
+                $('.isActive').addClass('badge-success');
             } else {
                 $('.isActive').text('Inactive');
             }
@@ -138,20 +170,20 @@ async function getAccount() {
             }
             $('.currentCycle').text(user_cycle['currentCycle']);
 
-
+            const statusElement = document.getElementById("cycleStatus");
             if (user_cycle['currentCycle'] == max_cycle) {
                 $('#provideHelp').hide();
                 $('#claimBinaryBtn').hide();
                 $('#topUP').show();
                 $('#phPage').hide();
-
+                statusElement.innerHTML = ` <span class="text-success fw-semibold"> <i class="bi bi-check-circle-fill me-1"></i> Completed  </span>`;
 
             } else {
                  $('#provideHelp').show();
                 $('#claimBinaryBtn').show();
                 $('#topUp').hide();
                $('#phPage').show();
-
+                    statusElement.innerHTML = ` <span class="text-success fw-semibold"> <i class="bi bi-circle-fill me-1"></i> Active</span> `;
 
             }
 
@@ -246,7 +278,7 @@ async function getAccount() {
             $('.currentPrice').text(`1 T20 = $ ${(currentPrice / 1e18).toFixed(4)}`);
         } else {
             $(".connect-btn").css('display', 'block');
-            toastr.error("Please select binance testnet network on Wallet.");
+            toastr.error("Please select binance mainnet network on Wallet.");
             return;
         }
     } catch (err) {
@@ -775,7 +807,7 @@ async function directPartners() {
                 <tr>
                     <td class="mono text-secondary">${i + 1}</td>
                     <td class="mono text-secondary">
-                        <a href="https://testnet.bscscan.com/address/${wallet}" target="_blank">
+                        <a href="https://bscscan.com/address/${wallet}" target="_blank">
                             ${shortAddress(wallet)}
                         </a>
                     </td>
@@ -2130,5 +2162,6 @@ async function topUpNow() {
     }
 }
 
+initStakingTokens();
 
 getAccount();

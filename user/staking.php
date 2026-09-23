@@ -694,7 +694,8 @@
 
                     <p class="stake-copy">
                         Stake your OLD TOKEN directly into the staking contract
-                        and earn NEW TOKEN rewards every 15 days.
+    and earn 10% NEW TOKEN rewards after 30 days.
+    Rewards can be claimed during the following 15-day claim window.
                     </p>
 
                 </div>
@@ -783,22 +784,9 @@
 
             <div class="glass-card stake-metric purple dash-reveal">
 
-                <!-- <div class="stake-metric__label">
-                    Next Reward
-                </div>
-
-                <div
-                    class="stake-metric__value"
-                    id="stakeNextClaim">
-                    --
-                </div>
-
-                <div class="stake-metric__hint">
-                    10% after 15 days
-                </div> -->
-
+             
 <div class="stake-metric__label">
-    Reward Available
+    Reward
 </div>
 
 <div
@@ -808,9 +796,8 @@
 </div>
 
 <div class="stake-metric__hint">
-    Claim anytime
+    After 30 days + 15 day claim window
 </div>
-
 
 
 
@@ -1043,7 +1030,7 @@
                                 </span>
 
                                 <strong>
-                                    15 Days
+                                    30 Days
                                 </strong>
 
                             </div>
@@ -1150,8 +1137,9 @@
     */
 
     const DECIMALS = 18;
-    const CLAIM_PERIOD = 15 * 24 * 60 * 60;
-    const REWARD_PERCENT = 10;
+   const CLAIM_PERIOD = 30 * 24 * 60 * 60;
+const CLAIM_WINDOW = 15 * 24 * 60 * 60;
+const REWARD_PERCENT = 10;
 
 
     function toast(message, error = false) {
@@ -1400,11 +1388,13 @@
 
             }
 
+            // new contract code
 
-            const raw =
-                await usdtContract.methods
-                    .balanceOf(account)
-                    .call();
+            // const raw = await usdtContract.methods .balanceOf(account).call();
+
+
+const raw = await oldTokenContract.methods .balanceOf(account)  .call();
+
 
             const balance =
                 tokenToNumber(raw);
@@ -1548,48 +1538,40 @@
     }
 
 
-    function updateNextClaim(
-        lastClaimTime,
-        active
-    ) {
+function updateNextClaim(
+    lastClaimTime,
+    active
+) {
+    if (!active) {
+        $("#stakeNextClaim").text("--");
 
-        if (!active) {
+        $("#claimRewardBtn")
+            .prop("disabled", true);
 
-            $("#stakeNextClaim")
-                .text("--");
+        return;
+    }
 
-            $("#claimRewardBtn")
-                .prop("disabled", true);
+    const rewardAvailableTime =
+        Number(lastClaimTime || 0) +
+        CLAIM_PERIOD;
 
-            return;
+    const claimDeadline =
+        rewardAvailableTime +
+        CLAIM_WINDOW;
 
-        }
+    const now =
+        Math.floor(Date.now() / 1000);
 
+    // Before 30 days
+    if (now < rewardAvailableTime) {
 
-        const next =
-            Number(lastClaimTime || 0) +
-            CLAIM_PERIOD;
-
-        const now =
-            Math.floor(Date.now() / 1000);
-
-        if (now >= next) {
-
-            $("#stakeNextClaim")
-                .text("READY");
-
-            $("#claimRewardBtn")
-                .prop("disabled", false);
-
-            return;
-
-        }
-
-
-        const remain = next - now;
+        const remain =
+            rewardAvailableTime - now;
 
         const days =
-            Math.floor(remain / 86400);
+            Math.floor(
+                remain / 86400
+            );
 
         const hours =
             Math.floor(
@@ -1601,90 +1583,61 @@
                 (remain % 3600) / 60
             );
 
-
         $("#stakeNextClaim")
             .text(
-                days +
-                "d " +
-                hours +
-                "h " +
-                minutes +
-                "m"
+                days + "d " +
+                hours + "h " +
+                minutes + "m"
             );
 
         $("#claimRewardBtn")
             .prop("disabled", true);
 
+        return;
     }
 
+    if (now <= claimDeadline) {
 
-    // async function loadClaimStatus() {
+        $("#stakeNextClaim")
+            .text("READY");
 
-    //     try {
+        $("#claimRewardBtn")
+            .prop("disabled", false);
 
-    //         const account =
-    //             await getAccountSafe();
+        return;
+    }
 
-    //         if (!account) return;
+    $("#stakeNextClaim")
+        .text("EXPIRED");
 
-
-    //         const canClaim =
-    //             await stakingContract.methods
-    //                 .canClaim(account)
-    //                 .call();
-
-
-    //         $("#claimRewardBtn")
-    //             .prop(
-    //                 "disabled",
-    //                 !canClaim
-    //             );
-
-
-    //     } catch (error) {
-
-    //         console.error(
-    //             "Claim status error:",
-    //             error
-    //         );
-
-    //     }
-
-    // }
+    $("#claimRewardBtn")
+        .prop("disabled", true);
+}
 
 
 async function loadClaimStatus() {
-
     try {
 
-        const account = await getAccountSafe();
+        const account =
+            await getAccountSafe();
 
         if (!account) {
-            $("#claimRewardBtn").prop("disabled", true);
+            $("#claimRewardBtn")
+                .prop("disabled", true);
+
             return;
         }
 
-        const user = await stakingContract.methods
-            .getUserInfo(account)
-            .call();
+        const canClaim =
+            await stakingContract.methods
+                .canClaim(account)
+                .call();
 
-        const active =
-            user.active !== undefined
-                ? user.active
-                : user[5];
-
-        const capital =
-            user.capital !== undefined
-                ? user.capital
-                : user[1];
-
-        const hasCapital =
-            Number(capital) > 0;
-
-        $("#claimRewardBtn").prop(
-            "disabled",
-            !(active && hasCapital)
-        );
+        $("#claimRewardBtn")
+            .prop(
+                "disabled",
+                !canClaim
+            );
 
     } catch (error) {
 
@@ -1693,14 +1646,10 @@ async function loadClaimStatus() {
             error
         );
 
-        $("#claimRewardBtn").prop(
-            "disabled",
-            true
-        );
+        $("#claimRewardBtn")
+            .prop("disabled", true);
     }
 }
-
-
 
     async function loadPendingReward() {
 
@@ -2127,8 +2076,7 @@ async function loadClaimStatus() {
             setButtonLoading(true);
 
 
-            const account =
-                await getAccountSafe();
+            const account =  await getAccountSafe();
 
 
             if (!account) {
@@ -2150,7 +2098,7 @@ async function loadClaimStatus() {
 
 
             const rawBalance =
-                await usdtContract.methods
+                await oldTokenContract.methods
                     .balanceOf(account)
                     .call();
 
@@ -2195,14 +2143,11 @@ async function loadClaimStatus() {
             }
 
 
-            const allowance =
-                await usdtContract.methods
-                    .allowance(
-                        account,
-                        staking_contract
-                    )
-                    .call();
+            // const allowance = await usdtContract.methods .allowance(  account, staking_contract ) .call();
 
+
+          
+const allowance = await oldTokenContract.methods .allowance( account, staking_contract ) .call();
 
             const gasPrice =
                 await getGasPriceSafe();
@@ -2228,11 +2173,8 @@ async function loadClaimStatus() {
 
 
                 const approveTx =
-                    usdtContract.methods
-                        .approve(
-                            staking_contract,
-                            amount
-                        )
+                    oldTokenContract.methods
+                        .approve( staking_contract,  amount   )
                         .send(
                             Object.assign(
                                 {
@@ -2253,13 +2195,7 @@ async function loadClaimStatus() {
             }
 
 
-            /*
-             * STAKE
-             *
-             * Actual contract:
-             *
-             * stakingContract.stake(amount)
-             */
+       
             toast(
                 "Approval successful. Confirm staking transaction.",
                 false
@@ -2334,9 +2270,6 @@ async function loadClaimStatus() {
             );
 
 
-            /*
-             * Refresh blockchain data
-             */
             await refreshPageData();
 
 
@@ -2451,50 +2384,68 @@ async function loadClaimStatus() {
             }
 
 
-            const canClaim =
-                await stakingContract.methods
-                    .canClaim(account)
-                    .call();
+            const canClaim = await stakingContract.methods.canClaim(account).call();
 
+if (!canClaim) {
 
-            // if (!canClaim) {
+    const user =
+        await stakingContract.methods
+            .getUserInfo(account)
+            .call();
 
-            //     const remaining =
-            //         await stakingContract.methods
-            //             .timeUntilClaim(account)
-            //             .call();
+    const lastClaimTime =
+        user.lastClaimTime !== undefined
+            ? user.lastClaimTime
+            : user[4];
 
+    const rewardAvailableTime =
+        Number(lastClaimTime) +
+        CLAIM_PERIOD;
 
-            //     const seconds =
-            //         Number(remaining || 0);
+    const claimDeadline =
+        rewardAvailableTime +
+        CLAIM_WINDOW;
 
+    const now =
+        Math.floor(Date.now() / 1000);
 
-            //     const days =
-            //         Math.floor(
-            //             seconds / 86400
-            //         );
+    if (now < rewardAvailableTime) {
 
+        const remain =
+            rewardAvailableTime - now;
 
-            //     const hours =
-            //         Math.floor(
-            //             (seconds % 86400) /
-            //             3600
-            //         );
+        const days =
+            Math.floor(
+                remain / 86400
+            );
 
+        const hours =
+            Math.floor(
+                (remain % 86400) / 3600
+            );
 
-            //     toast(
-            //         "Claim is not available yet. " +
-            //         days +
-            //         "d " +
-            //         hours +
-            //         "h remaining.",
-            //         true
-            //     );
+        toast(
+            "Reward will be available after " +  days + "d " + hours + "h.",
+            true
+        );
 
-            //     return;
+    } else if (now > claimDeadline) {
 
-            // }
+        toast(
+            "Claim window expired. The current cycle has expired.",
+            true
+        );
 
+    } else {
+
+        toast(
+            "Reward cannot be claimed right now.",
+            true
+        );
+    }
+
+    return;
+}
 
             const rewardRaw =
                 await stakingContract.methods

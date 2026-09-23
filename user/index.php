@@ -69,7 +69,7 @@
                 <div class="fw-semibold small" id="stat-userid">—</div>
                 <div class="text-secondary mono connected_walletdash" style="font-size: 0.7rem;" data-fill="wallet-address">Not connected</div>
               </div>
-              <span class="badge-status badge-success isActive" id="referralStatusBadge">Active</span>
+              <span class="badge-status badge-failed isActive" id="referralStatusBadge">Inactive</span>
             </div>
             <!-- <div class="d-flex justify-content-between text-secondary small mt-3 mb-1">
               <span>Direct referrals</span><span class="mono" id="stat-directs">—</span>
@@ -227,6 +227,7 @@
                     <div class="snapshot-chip">
             <div class="snapshot-chip__label">Current Cycle</div>
             <div class="snapshot-chip__value currentCycle" id="snap-cycle">—</div>
+              <div id="cycleStatus" class="small fw-semibold mt-1"> — </div>
           </div>
         </div>
       </div>

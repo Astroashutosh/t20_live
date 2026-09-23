@@ -55,16 +55,10 @@
                 <span class="tab-count" id="tabPhCount">0</span>
             </button> -->
 
-      <button
-  
-    type="button"
-    class="btn btn-veri-outline"
-    data-bs-toggle="modal"
-    data-bs-target="#topUpModal"
->
-    <i class="bi bi-arrow-down-circle me-2"></i>
-    <span id="topuptext">Top UP</span>
-</button> 
+      <button type="button" class="btn btn-veri-outline" data-bs-toggle="modal" data-bs-target="#topUpModal">
+            <i class="bi bi-arrow-down-circle me-2"></i>
+            <span id="topuptext">Top UP</span>
+        </button> 
 
         </div>
 
@@ -284,6 +278,42 @@ async function renderPH(){
 
     const tbody = document.getElementById("phTableBody");
 
+
+
+let userCanPH = false;
+let currentAccount = null;
+
+try {
+    currentAccount = await getCurrentAccount();
+
+    if (currentAccount) {
+        const userBase = await mainContract.methods
+            .userBase(currentAccount)
+            .call();
+        
+        
+       if(userBase.phCount <= 1){
+           userCanPH = true;
+       }else{
+           userCanPH =
+            userBase.ghEnable !== undefined
+                ? Boolean(userBase.ghEnable)
+                : Boolean(userBase[10]);
+       }
+        
+
+        console.log("PH/GH Status:", {
+            account: currentAccount,
+            ghEnable: userCanPH,
+            userBase: userBase.phCount
+        });
+    }
+} catch (statusError) {
+    console.error("Unable to read PH/GH status:", statusError);
+}
+
+
+
     try {
 
         // ============================================
@@ -451,21 +481,62 @@ requests.forEach((request, index) => {
     // ONLY FIRST ROW ENABLED
     // ============================================
 
-    const isFirstRow = index === 0;
+    // const isFirstRow = index === 0;
 
-    const buttonDisabled = !isFirstRow;
+    // const buttonDisabled = !isFirstRow;
 
-    const buttonClass = isFirstRow
-        ? "btn btn-success btn-sm"
-        : "btn btn-secondary btn-sm";
+    // const buttonClass = isFirstRow
+    //     ? "btn btn-success btn-sm"
+    //     : "btn btn-secondary btn-sm";
 
-    const buttonStyle = isFirstRow
-        ? ""
-        : "opacity:0.55;cursor:not-allowed;";
+    // const buttonStyle = isFirstRow
+    //     ? ""
+    //     : "opacity:0.55;cursor:not-allowed;";
 
-    const buttonText = isFirstRow
-        ? "Provide Help"
-        : "Provide Help";
+    // const buttonText = isFirstRow
+    //     ? "Provide Help"
+    //     : "Provide Help";
+
+
+const isFirstRow = index === 0;
+
+/*
+ * PH/GH STATUS
+ *
+ * GREEN = GH received / next PH available
+ * RED   = PH already done / GH pending
+ */
+
+let buttonDisabled = !isFirstRow;
+let buttonClass = "btn btn-secondary btn-sm";
+let buttonStyle = "opacity:0.55;cursor:not-allowed;";
+let buttonText = "Provide Help";
+let buttonIcon = "bi-hand-thumbs-up";
+
+/* Only first request can be selected */
+if (isFirstRow) {
+
+    if (userCanPH) {
+
+        // GREEN = Next PH available
+        buttonDisabled = false;
+        buttonClass = "btn btn-success btn-sm";
+        buttonStyle = "";
+        buttonText = "Provide Help";
+        buttonIcon = "bi-hand-thumbs-up";
+
+    } else {
+
+        // RED = PH pending / already used
+        buttonDisabled = true;
+        buttonClass = "btn btn-danger btn-sm";
+        buttonStyle = "opacity:1;cursor:not-allowed;";
+        buttonText = "PH Pending";
+        buttonIcon = "bi-hourglass-split";
+    }
+}
+
+
 
     const row = document.createElement("tr");
 
@@ -500,7 +571,7 @@ requests.forEach((request, index) => {
                     wallet:'${escapeHtml(wallet)}'
                 })">
 
-                <i class="bi bi-hand-thumbs-up me-1"></i>
+               <i class="bi ${buttonIcon} me-1"></i>
                 ${buttonText}
             </button>
         </td>
